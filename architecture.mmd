@@ -1,0 +1,85 @@
+﻿graph TB
+    subgraph USER["?? ?????"]
+        BROWSER["??? Web UI<br/>static/index.html + app.js"]
+    end
+
+    subgraph GATEWAY["? FastAPI Gateway :9900"]
+        CHAT["/api/chat<br/>?????"]
+        CHAT_SSE["/api/chat_stream<br/>SSE ????"]
+        AIOPS["/api/aiops<br/>???? SSE"]
+        UPLOAD["/api/upload<br/>????"]
+        HEALTH["/api/health<br/>????"]
+    end
+
+    subgraph RAG_AGENT["?? RAG ?? Agent<br/>rag_agent_service.py"]
+        direction TB
+        AGENT_CORE["LangChain create_agent<br/>ChatQwen (qwen-max)"]
+        MEMORY["MemorySaver<br/>Checkpointer"]
+        MSG_TRIM["trim_messages_middleware<br/>???????"]
+        AGENT_CORE --> MEMORY
+        AGENT_CORE --> MSG_TRIM
+    end
+
+    subgraph PE_AGENT["?? Plan-Execute-Replan Agent<br/>aiops_service.py"]
+        direction LR
+        PLANNER["Planner<br/>???? + ????"] --> EXECUTOR["Executor<br/>???? + ????"]
+        EXECUTOR --> REPLANNER["Replanner<br/>???? + ?????"]
+        REPLANNER -->|"?????"| EXECUTOR
+        REPLANNER -->|"????"| REPORTER["Reporter<br/>Markdown ????"]
+    end
+
+    subgraph TOOLS["?? ??? (Tool Calling)"]
+        KNOWLEDGE["retrieve_knowledge<br/>RAG ????"]
+        TIME_TOOL["get_current_time<br/>????"]
+        MCP_CLIENT["MCP Client<br/>?????? ?3"]
+    end
+
+    subgraph MCP_SERVERS["?? MCP ????<br/>FastMCP"]
+        CLS["CLS Server :8003<br/>???? ? ????"]
+        MONITOR["Monitor Server :8004<br/>CPU/??????"]
+    end
+
+    subgraph INFRA["??? ?????"]
+        MILVUS[("Milvus ???<br/>:19530 ? Docker")]
+        DASHSCOPE["DashScope API<br/>qwen-max ? embedding-v4"]
+        DISK[("?????<br/>JSON File Store")]
+    end
+
+    subgraph DOC_PIPELINE["?? ??????"]
+        direction LR
+        UPLOAD_DOC["????"] --> SPLITTER["????<br/>chunk=800 ? overlap=100"]
+        SPLITTER --> EMBED["Embedding<br/>text-embedding-v4 ? 1024?"]
+        EMBED --> INDEX["????<br/>Milvus Collection"]
+    end
+
+    BROWSER --> CHAT
+    BROWSER --> CHAT_SSE
+    BROWSER --> AIOPS
+    BROWSER --> UPLOAD
+
+    CHAT --> RAG_AGENT
+    CHAT_SSE --> RAG_AGENT
+    AIOPS --> PE_AGENT
+    UPLOAD --> DOC_PIPELINE
+
+    RAG_AGENT --> TOOLS
+    EXECUTOR --> TOOLS
+
+    KNOWLEDGE --> MILVUS
+    MCP_CLIENT --> CLS
+    MCP_CLIENT --> MONITOR
+    AGENT_CORE --> DASHSCOPE
+    PLANNER --> DASHSCOPE
+    REPLANNER --> DASHSCOPE
+    MEMORY --> DISK
+    INDEX --> MILVUS
+
+    style USER fill:#e3f2fd,stroke:#1565c0
+    style GATEWAY fill:#e8f5e9,stroke:#2e7d32
+    style RAG_AGENT fill:#fff3e0,stroke:#e65100
+    style PE_AGENT fill:#f3e5f5,stroke:#7b1fa2
+    style TOOLS fill:#fce4ec,stroke:#c62828
+    style MCP_SERVERS fill:#e0f7fa,stroke:#00838f
+    style INFRA fill:#f5f5f5,stroke:#616161
+    style DOC_PIPELINE fill:#fff8e1,stroke:#f9a825
+

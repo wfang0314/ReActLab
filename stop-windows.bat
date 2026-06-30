@@ -1,0 +1,61 @@
+@echo off
+chcp 65001 >nul
+echo ====================================
+echo ?? ReActLab ??
+echo ====================================
+echo.
+
+REM ?? FastAPI ??
+echo [1/4] ?? FastAPI ??...
+taskkill /FI "WINDOWTITLE eq ReActLab API*" /F >nul 2>&1
+if errorlevel 1 (
+    echo [??] FastAPI ?????????
+) else (
+    echo [??] FastAPI ?????
+)
+echo.
+
+REM ?? CLS MCP ??
+echo [2/4] ?? CLS MCP ??...
+taskkill /FI "WINDOWTITLE eq CLS MCP Server*" /F >nul 2>&1
+if errorlevel 1 (
+    echo [??] CLS MCP ?????????
+) else (
+    echo [??] CLS MCP ?????
+)
+echo.
+
+REM ?? Monitor MCP ??
+echo [3/4] ?? Monitor MCP ??...
+taskkill /FI "WINDOWTITLE eq Monitor MCP Server*" /F >nul 2>&1
+if errorlevel 1 (
+    echo [??] Monitor MCP ?????????
+) else (
+    echo [??] Monitor MCP ?????
+)
+echo.
+
+REM ?? Docker ??
+echo [4/4] ?? Milvus ??...
+docker ps --format "{{.Names}}" | findstr "milvus" >nul 2>&1
+if not errorlevel 1 (
+    docker compose -f vector-database.yml down
+    if errorlevel 1 (
+        echo [??] Docker ??????
+    ) else (
+        echo [??] Milvus ?????
+    )
+) else (
+    echo [??] Milvus ?????
+)
+echo.
+
+echo ====================================
+echo ????????
+echo ====================================
+echo.
+echo ??:
+echo   - ?????? Docker ??????:
+echo     docker compose -f vector-database.yml down -v
+echo.
+pause

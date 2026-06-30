@@ -1,0 +1,29 @@
+{
+  "benchmark": "ReActLab Agent Benchmark",
+  "timestamp": "2026-06-26 19:32:16",
+  "rag": {
+    "total": 100,
+    "top1_pass": 86,
+    "top1_pct": 86.0,
+    "recall3_pass": 94,
+    "recall3_pct": 94.0,
+    "mrr": 0.8867
+  },
+  "mcp_retry": {
+    "max_retries": 3,
+    "strategy": "exponential_backoff",
+    "with_retry_pass": 3,
+    "without_retry_pass": 1,
+    "improvement_pp": 50
+  },
+  "agent": {
+    "success_rate_pct": 100.0,
+    "total_tasks": 10,
+    "passed": 10,
+    "pattern": "Plan-Execute-Replan",
+    "framework": "LangGraph"
+  },
+  "api": {
+    "health_p50_ms": 218.0
+  }
+}
